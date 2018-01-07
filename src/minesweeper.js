@@ -24,11 +24,40 @@ const generateBombBoard = (numberOfRows, numberOfColumns, numberOfBombs) => {
   while (numberOfBombsPlaced < numberOfBombs ) {
     let randomRowIndex = Math.floor(Math.random() * numberOfRows);
     let randomColumnIndex = Math.floor(Math.random() * numberOfColumns);
-    board[randomRowIndex][randomColumnIndex] = 'B';
-    numberOfBombsPlaced += 1;
-    //this loop can potentially place bombs on top of bombs - control flow will fix that later
+    if (board[randomRowIndex][randomColumnIndex] !== 'B') {
+      board[randomRowIndex][randomColumnIndex] = 'B';
+      numberOfBombsPlaced += 1;
+    }
   }
   return board;
+};
+//code will gather and compare info to tell whether a bomb is adjacent to a tile or not
+let getNumberOfNeighborBombs = (bombBoard, rowIndex, columnIndex) => {
+  const neighborOffsets = [[-1, -1], [-1, 0], [-1, 1], [0,-1], [0,1], [1, -1], [1, 0], [1, 1]];
+  const numberOfRows = bombBoard.length;
+  const numberOfColumns = bombBoard[0].length;
+  let numberOfBombs = 0;
+  neighborOffsets.forEach(offset => {
+    const neighborRowIndex = rowIndex + offset[0];
+    const neighborColumnIndex = columnIndex + offset[1];
+    if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
+      if (bombBoard[neighborRowIndex][neighborColumnIndex] === 'B') {
+        numberOfBombs++;
+      }
+    }
+  });
+  return numberOfBombs;
+};
+//code allows a player to flip a tile
+const flipTile = (playerBoard, bombBoard, rowIndex, columnIndex) => {
+  if (playerBoard[rowIndex][columnIndex] !==  '   ') {
+    console.log('This tile has already been flipped!');
+    return;
+  } else if (bombBoard[rowIndex][columnIndex] === 'B') {
+    playerBoard[rowIndex][columnIndex] = 'B';
+  } else {
+    playerBoard[rowIndex][columnIndex] = getNumberOfNeighborBombs(bombBoard, rowIndex, columnIndex);
+  }
 };
 //function iterates through to join the elements, and then join the rows
 let printBoard = board => {
@@ -42,3 +71,7 @@ console.log('Player board: ');
 printBoard(playerBoard);
 console.log('Bomb board: ')
 printBoard(bombBoard);
+//call the flipTile function
+flipTile(playerBoard, bombBoard, 1, 1);
+console.log('Updated Player Board: ');
+printBoard(playerBoard);
